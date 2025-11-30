@@ -253,13 +253,13 @@ function creerMenuBoutons() {
     Menu.innerHTML=`
         <div class="menu-container">
             <h2> Choose The Difficulty </h2>
-            <button onclick="playSound('difficulty'); Difficulte(1)">1 - Beginner</button>
-            <button onclick="playSound('difficulty'); Difficulte(2)">2 - Easy</button>
-            <button onclick="playSound('difficulty'); Difficulte(3)">3 - Medium</button>
-            <button onclick="playSound('difficulty'); Difficulte(4)">4 - Hard</button>
-            <button onclick="playSound('difficulty'); Difficulte(5)">5 - Expert</button>
-            <button onclick="playSound('difficulty'); Difficulte(6)">6 - Custom</button>
-            <button onclick="playSound('difficulty'); showModeSelection()" style="margin-top:1.5rem; background:#777;">
+            <button onclick="playSound('buttonPress'); Difficulte(1)">1 - Beginner</button>
+            <button onclick="playSound('buttonPress'); Difficulte(2)">2 - Easy</button>
+            <button onclick="playSound('buttonPress'); Difficulte(3)">3 - Medium</button>
+            <button onclick="playSound('buttonPress'); Difficulte(4)">4 - Hard</button>
+            <button onclick="playSound('buttonPress'); Difficulte(5)">5 - Expert</button>
+            <button onclick="playSound('buttonPress'); Difficulte(6)">6 - Custom</button>
+            <button onclick="playSound('buttonPress'); showModeSelection()" style="margin-top:1.5rem; background:#777;">
                 ← Back to Mode Select
             </button>
         </div>
@@ -438,28 +438,51 @@ function createWinModal(numero) {
     return winModal;
 }
 function showCustomMenu() {
+    Menu.style.display = "none";
     Number_game.innerHTML = "";
     const customMenu = document.createElement("div");
-    customMenu.className = "game-start-screen";
+    customMenu.className = "menu-container";
     const title = document.createElement("h2");
-    title.textContent = "Custom Mode";
+    title.textContent = "Custom - Select Range";
+    title.className = "game-start-title";
     customMenu.appendChild(title);
-    let minValue = 1;
-    let maxValue = 10;
+
     const inputContainer = document.createElement("div");
+    inputContainer.id = "inputContainer";
+    inputContainer.className = "custom-input-container";
+
+    const minSection = document.createElement("div");
+    minSection.className = "custom-input-section";
+    const minLabel = document.createElement("span");
+    minLabel.className = "custom-input-label";
+    minLabel.textContent = "Min:";
     const minInput = document.createElement("input");
     minInput.type = "number";
-    minInput.value = minValue;
+    minInput.value = 1;
     minInput.min = 1;
-    minInput.max = maxValue - 1;
-    const minLabel = document.createElement("span");
-    minLabel.textContent = "Min:";
+    minInput.className = "custom-input custom-input-min";
+    minSection.appendChild(minLabel);
+    minSection.appendChild(minInput);
+    inputContainer.appendChild(minSection);
+
+    const maxSection = document.createElement("div");
+    maxSection.className = "custom-input-section";
+    const maxLabel = document.createElement("span");
+    maxLabel.className = "custom-input-label";
+    maxLabel.textContent = "Max:";
     const maxInput = document.createElement("input");
     maxInput.type = "number";
-    maxInput.value = maxValue;
-    maxInput.min = minValue + 1;
-    const maxLabel = document.createElement("span");
-    maxLabel.textContent = "Max:";
+    maxInput.value = 1000;
+    maxInput.min = 2;
+    maxInput.className = "custom-input custom-input-max";
+    maxSection.appendChild(maxLabel);
+    maxSection.appendChild(maxInput);
+    inputContainer.appendChild(maxSection);
+
+    customMenu.appendChild(inputContainer);
+
+    let minValue = 1;
+    let maxValue = 1000;
     minInput.addEventListener("input", () => {
         let val = Number(minInput.value);
         if (val >= 1 && val < maxValue) minValue = val;
@@ -472,20 +495,18 @@ function showCustomMenu() {
         else maxInput.value = maxValue;
         minInput.max = maxValue - 1;
     });
-    inputContainer.appendChild(minLabel);
-    inputContainer.appendChild(minInput);
-    inputContainer.appendChild(maxLabel);
-    inputContainer.appendChild(maxInput);
-    customMenu.appendChild(inputContainer);
+
+
     const startBtn = document.createElement("button");
-    startBtn.textContent = "Start";
+    startBtn.textContent = "Start Game";
     startBtn.className = "game-start-btn";
+    startBtn.style.marginTop = "2rem";
     startBtn.onclick = () => {
         sounds.inGame.pause();
         sounds.inGame.currentTime = 0;
         playSound('start');
         setTimeout(() => { sounds.inGame.play().catch(() => {}); }, 1000);
-        customMenu.remove();
+        Number_game.innerHTML = "";
         const randomNumber = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
         initGuessing(6, minValue, maxValue, randomNumber);
     };
