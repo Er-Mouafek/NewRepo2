@@ -1,5 +1,5 @@
 ﻿const sounds = {
-    difficulty: new Audio('sounds/click-difficulty.mp3'),
+    buttonPress: new Audio('sounds/click-button.mp3'),
     start: new Audio('sounds/click-start.mp3'),
     inGame: new Audio('sounds/in-game.mp3'),
     winWait: new Audio('sounds/win-wait.mp3'),
@@ -9,20 +9,26 @@
 sounds.winWait.volume = 0.4;
 sounds.inGame.loop = true;
 sounds.inGame.volume = 0.4;
+Object.values(sounds).forEach(s => s.load());
+
+const pressStartScreen = document.getElementById('pressStartScreen');
+const pressStartBtn = document.getElementById('pressStartBtn');
+const Menu = document.getElementById("Menu_principale");
+
+const Number_game = document.getElementById("Number_game");
+
+let lastUsedDifficulty = 3; // Default to Medium
+
 function playSound(type) {
     const s = sounds[type];
     if (!s) return;
     s.currentTime = 0;
-    s.play().catch(() => {});
+    s.play().catch(() => { });
 }
-Object.values(sounds).forEach(s => s.load());
-// === PRESS START SYSTEM ===
-const pressStartScreen = document.getElementById('pressStartScreen');
-const pressStartBtn = document.getElementById('pressStartBtn');
-const Menu = document.getElementById("Menu_principale");
-const Number_game = document.getElementById("Number_game");
-let lastUsedDifficulty = 3; // Default to Medium
+
+
 pressStartBtn.onclick = () => {
+    playSound('buttonPress');
     sounds.inGame.play().catch(() => {});
     pressStartScreen.classList.add('press-start-fadeout');
     setTimeout(() => {
@@ -36,7 +42,12 @@ pressStartBtn.onclick = () => {
         });
     }, 800);
 };
+
+
 function showModeSelection() {
+    Menu.style.display = 'block';
+    Menu.style.opacity = '0';
+    Menu.style.transform = 'translateX(100vw)';
 
     Menu.innerHTML = `
         <div class="mode-selection">
@@ -55,29 +66,25 @@ function showModeSelection() {
             </div>
         </div>
     `;
-    Menu.style.display = 'block';
-    Menu.style.opacity = '0';
-    Menu.style.transform = 'translateX(100vw)';
-    requestAnimationFrame(() => {
-        Menu.classList.add('slide-in-right');
-        Menu.style.opacity = '1';
-        Menu.style.transform = 'translateX(0)';
-    });
+    Menu.classList.add('slide-in-right');
+
     document.getElementById('soloModeBtn').onclick = () => {
-        playSound('difficulty');
+        playSound('buttonPress');
         Menu.classList.add('slide-out-left');
-        setTimeout(() => creerMenuBoutons(), 400);
+        setTimeout(() => creerMenuBoutons(), 100);
     };
     document.getElementById('vsModeBtn').onclick = () => {
-        playSound('difficulty');
+        playSound('buttonPress');
         Menu.classList.add('slide-out-left');
-        setTimeout(() => show1v1DifficultyMenu(), 400);
+        setTimeout(() => show1v1DifficultyMenu(), 100);
     };
 }
 function show1v1DifficultyMenu() {
+    Menu.style.opacity = '0';
+    Menu.style.transform = 'translateX(100vw)';
     Menu.innerHTML = `
         <div class="menu-container">
-            <h2 style="color:#ff6b6b; text-shadow:0 0 20px #ff6b6b;">1v1 BATTLE - Choose Difficulty</h2>
+            <h2>1v1 BATTLE - Choose Difficulty</h2>
             <button onclick="playSound('difficulty'); start1v1NameEntry(1)">1 - Beginner</button>
             <button onclick="playSound('difficulty'); start1v1NameEntry(2)">2 - Easy</button>
             <button onclick="playSound('difficulty'); start1v1NameEntry(3)">3 - Medium</button>
@@ -89,9 +96,9 @@ function show1v1DifficultyMenu() {
             </button>
         </div>
     `;
-    Menu.style.opacity = '0';
-    Menu.style.transform = 'translateX(100vw)';
+    Menu.classList.remove('slide-out-left', 'slide-in-right');
     requestAnimationFrame(() => Menu.classList.add('slide-in-right'));
+    
 }
 function start1v1NameEntry(difficulty) {
     lastUsedDifficulty = difficulty;
@@ -192,6 +199,9 @@ function launch1v1Battle(p1Name, p2Name) {
             countdown.classList.add('show');
             playSound('goBeep');
             flash.style.display = "block";
+            // Shockwave
+            document.body.insertAdjacentHTML("beforeend", `<div class="go-shockwave"></div>`);
+            setTimeout(() => document.querySelector(".go-shockwave")?.remove(), 800);
             gameActive = true;
             p1input.disabled = false;
             p1input.focus();
@@ -240,74 +250,105 @@ const VICTORY_DISPLAY_TIME = 2000; // ← Change this number anytime (3000 = 3 s
 const SMOOTH_TRANSITION = 400; // Small delay for smooth animations
 // ================================
 function creerMenuBoutons() {
-    Menu.innerHTML = `
+    Menu.innerHTML=`
         <div class="menu-container">
             <h2> Choose The Difficulty </h2>
-                <button onclick="playSound('difficulty'); Difficulte(1)">1 - Beginner</button>
-                <button onclick="playSound('difficulty'); Difficulte(2)">2 - Easy</button>
-                <button onclick="playSound('difficulty'); Difficulte(3)">3 - Medium</button>
-                <button onclick="playSound('difficulty'); Difficulte(4)">4 - Hard</button>
-                <button onclick="playSound('difficulty'); Difficulte(5)">5 - Expert</button>
-                <button onclick="playSound('difficulty'); Difficulte(6)">6 - Custom</button>
-                <button onclick="playSound('difficulty'); showModeSelection()" style="margin-top:1.5rem; background:#777;">
+            <button onclick="playSound('difficulty'); Difficulte(1)">1 - Beginner</button>
+            <button onclick="playSound('difficulty'); Difficulte(2)">2 - Easy</button>
+            <button onclick="playSound('difficulty'); Difficulte(3)">3 - Medium</button>
+            <button onclick="playSound('difficulty'); Difficulte(4)">4 - Hard</button>
+            <button onclick="playSound('difficulty'); Difficulte(5)">5 - Expert</button>
+            <button onclick="playSound('difficulty'); Difficulte(6)">6 - Custom</button>
+            <button onclick="playSound('difficulty'); showModeSelection()" style="margin-top:1.5rem; background:#777;">
                 ← Back to Mode Select
             </button>
         </div>
-    `;
+    `; 
+    
+    Menu.classList.remove('slide-out-left', 'slide-in-right');
+    requestAnimationFrame(()=>Menu.classList.add('slide-in-right'));
 }
 function getName(numero) {
     const names = ["", "Beginner", "Easy", "Medium", "Hard", "Expert", "Custom"];
     return names[numero];
 }
 function initGuessing(numero, low, high, nbr) {
-    // Create countdown overlay
     const countdown = document.createElement("div");
     countdown.className = "countdown";
     countdown.textContent = "3";
     document.body.appendChild(countdown);
+
     const flash = document.createElement("div");
+    flash.id = "flash"; 
     flash.className = "go-flash";
     document.body.appendChild(flash);
-    // Prepare game area
+
     Number_game.innerHTML = `
-        <input type="text" id="guessInput" placeholder="Deviner le nombre" autofocus>
-        <div id="feedback"></div>
+        <div class="menu-container">
+            <input type="text" id="guessInput" placeholder="Guess the number" disabled>
+            <div id="feedback"></div>
+        </div>
     `;
-    Number_game.classList.add('active');
+
+
     const input = document.getElementById('guessInput');
     const feedback = document.getElementById('feedback');
-   
-    let i = 0;
+
     let T_guess = [];
-    // === 3…2…1…GO! COUNTDOWN ===
-        // ←←← INPUT DISABLED UNTIL GO!
-    input.disabled = true;
-    input.style.opacity = "0.5";
+    let tries = 0;
+    let gameActive = false;
+
+    // Countdown
     let count = 3;
     const timer = setInterval(() => {
-        if (e.key !== "Enter") return;
-        const guess = Number(input.value);
-        if (isNaN(guess)) {
-            input.value = "";
-            return;
+        if (count > 0) {
+            countdown.textContent = count;
+            countdown.classList.add('show');
+            playSound('countdownBeep');
+        } else {
+            countdown.textContent = "GO!";
+            countdown.classList.add('show');
+            playSound('goBeep');
+            flash.style.display = "block";
+            // Shockwave
+            document.body.insertAdjacentHTML("beforeend", `<div class="go-shockwave"></div>`);
+            setTimeout(() => document.querySelector(".go-shockwave")?.remove(), 800);
+            gameActive = true;
+            input.disabled = false;
+            input.focus();
+            setTimeout(() => {
+                countdown.remove();
+                flash.remove();
+            }, 1000);
+            clearInterval(timer);
         }
-        const result = document.createElement('p');
-        Number_game.appendChild(result);
-        if (guess > high || guess < low) {
-            result.textContent = `Guess a number between ${low} and ${high}`;
+        count--;
+    }, 1000);
+
+    // Input handling
+    input.addEventListener('keydown', e => {
+        if (!gameActive || e.key !== "Enter") return;
+        const guess = Number(input.value);
+        if (isNaN(guess) || guess < low || guess > high) {
             input.value = "";
             return;
         }
         if (T_guess.includes(guess)) {
-            result.textContent = `You already tried this number guess again`;
+            const msg = document.createElement('p');
+            msg.textContent = "You already tried this number, guess again";
+            feedback.prepend(msg);
             input.value = "";
             return;
         }
-        i++;
+
+        tries++;
         T_guess.push(guess);
-        if (nbr == guess) {
-            result.textContent = `Good Job! You won in ${i} tries`;
-            input.disabled = true;
+
+        const msg = document.createElement('p');
+        if (guess === nbr) {
+            msg.textContent = `Good Job! You won in ${tries} tries`;
+            msg.classList.add("win-message");
+            gameActive = false;
             sounds.inGame.pause();
             sounds.inGame.currentTime = 0;
             playSound('winWait');
@@ -316,16 +357,20 @@ function initGuessing(numero, low, high, nbr) {
                 winModal.classList.remove("hidden");
             }, 200);
         } else {
-            if (nbr < guess) result.textContent = `Try Again, the number is lower than ${guess}`;
-            else result.textContent = `Try Again, the number is higher than ${guess}`;
+            msg.textContent = guess < nbr
+                ? `Try Again, the number is higher than ${guess}`
+                : `Try Again, the number is lower than ${guess}`;
         }
+        feedback.prepend(msg);
         input.value = "";
     });
 }
+
 function PlayerInput(numero, low, high) {
+    Menu.style.display = 'none';
     Number_game.innerHTML = "";
     const container = document.createElement("div");
-    container.className = "game-start-screen";
+    container.className = "menu-container";
     const title = document.createElement("h3");
     title.className = "game-start-title";
     title.textContent = `${getName(numero)} - Numbers from ${low} to ${high}`;
@@ -374,13 +419,13 @@ function createWinModal(numero) {
     Number_game.appendChild(winModal);
   
     playAgainBtn.addEventListener("click", () => {
-        playSound('difficulty');
+        playSound('buttonPress');
         sounds.inGame.play().catch(() => { });
         winModal.classList.add("hidden");
         Difficulte(numero);
     });
     cancelBtn.addEventListener("click", () => {
-        playSound('difficulty');
+        playSound('buttonPress');
         winModal.classList.add("hidden");
         Number_game.innerHTML = "";
         Number_game.style.display = 'none';
@@ -451,11 +496,8 @@ function Difficulte(numero) {
     // Show the game area
     Number_game.style.display = 'block';
     Number_game.style.opacity = '0';
+    Number_game.style.transform = 'translateX(100vw)';
     // Small delay to trigger transition
-    setTimeout(() => {
-        Number_game.style.transition = 'opacity 0.5s';
-        Number_game.style.opacity = '1';
-    }, 50);
     Number_game.innerHTML = "";
     switch (numero) {
         case 1:
@@ -477,4 +519,5 @@ function Difficulte(numero) {
             showCustomMenu();
             break;
     }
+    Number_game.classList.add('slide-in-right');
 }
