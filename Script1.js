@@ -250,6 +250,7 @@ const VICTORY_DISPLAY_TIME = 2000; // ← Change this number anytime (3000 = 3 s
 const SMOOTH_TRANSITION = 400; // Small delay for smooth animations
 // ================================
 function creerMenuBoutons() {
+    Menu.style.display = 'block';
     Menu.innerHTML=`
         <div class="menu-container">
             <h2> Choose The Difficulty </h2>
@@ -329,8 +330,15 @@ function initGuessing(numero, low, high, nbr) {
     input.addEventListener('keydown', e => {
         if (!gameActive || e.key !== "Enter") return;
         const guess = Number(input.value);
-        if (isNaN(guess) || guess < low || guess > high) {
+        if (isNaN(guess)) {
             input.value = "";
+            return;
+        }
+        if (guess < low || guess > high) {
+            input.value = "";
+            const msg = document.createElement('p');
+            msg.textContent = `Please enter a number between ${low} and ${high}`;
+            feedback.prepend(msg);
             return;
         }
         if (T_guess.includes(guess)) {
@@ -368,7 +376,6 @@ function initGuessing(numero, low, high, nbr) {
 
 function PlayerInput(numero, low, high) {
     Menu.style.display = 'none';
-    Number_game.innerHTML = "";
     const container = document.createElement("div");
     container.className = "menu-container";
     const title = document.createElement("h3");
@@ -377,6 +384,7 @@ function PlayerInput(numero, low, high) {
     const startBtn = document.createElement("button");
     startBtn.className = "game-start-btn";
     startBtn.textContent = "Start Game";
+
     startBtn.onclick = () => {
         sounds.inGame.pause();
         sounds.inGame.currentTime = 0;
@@ -386,16 +394,29 @@ function PlayerInput(numero, low, high) {
         const nbr = Math.floor(Math.random() * (high - low + 1)) + low;
         initGuessing(numero, low, high, nbr);
     };
+
+    const gobackBtn = document.createElement("button");
+    gobackBtn.textContent = "← Back to Difficulty Selection";
+    gobackBtn.style.marginTop = "1.5rem";
+    gobackBtn.style.background = "#777";
+    gobackBtn.onclick = () => {
+        playSound('buttonPress');
+        container.remove();
+        Number_game.style.display = 'none';
+        creerMenuBoutons();
+    }
+
     container.appendChild(title);
     container.appendChild(startBtn);
+    container.appendChild(gobackBtn);
     Number_game.appendChild(container);
 }
 function createWinModal(numero) {
-   
+
     const winModal = document.createElement("div");
     winModal.id = "winModal";
     winModal.className = "modal-overlay hidden";
-   
+
     const modal = document.createElement("div");
     modal.className = "modal";
     const title = document.createElement("h2");
@@ -417,23 +438,28 @@ function createWinModal(numero) {
     modal.appendChild(btnContainer);
     winModal.appendChild(modal);
     Number_game.appendChild(winModal);
-  
+
     playAgainBtn.addEventListener("click", () => {
         playSound('buttonPress');
-        sounds.inGame.play().catch(() => { });
-        winModal.classList.add("hidden");
-        Difficulte(numero);
+        winModal.remove();
+
+        setTimeout(() => {
+            sounds.inGame.play().catch(() => { });
+            Difficulte(numero);
+        }, 2000);
     });
     cancelBtn.addEventListener("click", () => {
         playSound('buttonPress');
-        winModal.classList.add("hidden");
-        Number_game.innerHTML = "";
-        Number_game.style.display = 'none';
-        Menu.innerHTML = "";
-        creerMenuBoutons();
-        Menu.style.display = 'block';
-        Menu.style.opacity = '1';
-        sounds.inGame.play().catch(() => { });
+        winModal.remove();
+        setTimeout(() => {
+            Number_game.innerHTML = "";
+            Number_game.style.display = 'none';
+            Menu.innerHTML = "";
+            creerMenuBoutons();
+            Menu.style.display = 'block';
+            Menu.style.opacity = '1';
+            sounds.inGame.play().catch(() => { });
+        }, 2000);
     });
     return winModal;
 }
@@ -491,7 +517,7 @@ function showCustomMenu() {
     });
     maxInput.addEventListener("input", () => {
         let val = Number(maxInput.value);
-        if (val > minValue && val <= 1000) maxValue = val;
+        if (val > minValue && val <= 10000) maxValue = val;
         else maxInput.value = maxValue;
         minInput.max = maxValue - 1;
     });
@@ -510,7 +536,23 @@ function showCustomMenu() {
         const randomNumber = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
         initGuessing(6, minValue, maxValue, randomNumber);
     };
+
+    const gobackBtn = document.createElement("button");
+    gobackBtn.className = "game-back-btn";
+    gobackBtn.textContent = "← Back to Difficulty Selection";
+    gobackBtn.style.marginTop = "1.5rem";
+    gobackBtn.style.background = "#777";
+
+    gobackBtn.onclick = () => {
+        playSound('buttonPress');
+        customMenu.remove();
+        Number_game.style.display = 'none';
+        creerMenuBoutons();
+    }
+
+
     customMenu.appendChild(startBtn);
+    customMenu.appendChild(gobackBtn);
     Number_game.appendChild(customMenu);
 }
 function Difficulte(numero) {
